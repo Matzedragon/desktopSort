@@ -1,6 +1,7 @@
 # This program is gonna sort files on your desktop and put them in a folder :
 # document/picture/software etc...
 import os
+import re
 from os import listdir
 from os.path import isfile, join
 
@@ -26,6 +27,7 @@ choice = [["audio", "compressed", "documents", "shortcut", "video", "programming
 
 allFiles = [] # All file names found on the user's desktop
 
+# return the index of the type of file the user want more details about
 switcher = {
     "audio": 0,
     "compressed": 1,
@@ -38,35 +40,44 @@ switcher = {
     "other": 8
 }
 
-print("Here are the kind of file that can be sorted: ")
-for type in choice[0]:
-    print("- " + type)
-argument = input("If you want more details about a type, type it\'s name else type 0: ")
-if "0" in argument:
-    result = 0
-else:
-    result = "string"
-
-while(isinstance(result, str)):
-    result = switcher.get(argument, "Invalid choice")
-    if isinstance(result, str):
-        print( result)
-        argument = input('\n' + "which type do you wanna display (0 if nothing) ? ")
-        if "0" in argument:
-            result = -1
+result=  ""
+while(result != -1):
+    os.system('CLS')
+    print("Here are the kind of file that can be sorted: ")
+    for type in choice[0]:
+        print("------ " + type)
+    print('\n')
+    argument = input("If you want more details about a type, type it\'s name else type 0: ")
+    if "0" in argument:
+        result = -1
     else:
-        print("\nhere are all the extention of this category: ")
-        print(choice[1][result])
-        input("\nPress Enter to continue...")
+        result = "string"
+
+    while(isinstance(result, str)):
+        result = switcher.get(argument, "Invalid choice")
+        if isinstance(result, str):
+            print( result)
+            argument = input('\n' + "which type do you wanna display (0 if nothing) ? ")
+            if "0" in argument:
+                result = -1
+        else:
+            print("\nhere are all the extention of this category: ")
+            print(choice[1][result])
+            input("\nPress Enter to continue...")
+
 
 
 # Find all files on the desktop and put them in an array
 for f in listdir(desktop):
-    if isfile(join(desktop, f)):
+    if isfile(join(desktop, f)) and "desktop.ini" not in f :
         allFiles.append(f)
 
-print("file found: " + str(len(allFiles)))
-
+print("\nfile found on your desktop: " + str(len(allFiles)))
+if len(allFiles) < 1:
+    print("there's no file that can be sorted on your desktop the program will close...")
+    input("\nPress Enter to continue...\n")
+    os._exit(0)
+input("\nPress Enter to continue...\n")
 Nocategory = []
 
 
@@ -82,33 +93,61 @@ for file in allFiles:   # get each file
         Nocategory.append(file) # If the file extention wasn't find
 
 userchoice = []
-print("Here are the type of file that are going to be sort from what we found on your desktop")
-# Choice of which type of file we want to sort
 for x in range(len(choice[1])):
     if len(choice[1][x]) >1:
         userchoice.append(x)
-        print(str(x) + ")" + choice[0][x])
-argument = print("enter the number to see what files will be sorted for a category: ")
-#TODO details
+
+while("none" not in argument):
+    os.system('CLS')
+    print("Here are the type of file that are going to be sorted from what we found on your desktop: ")
+    # Choice of which type of file we want to sort
+    for x in range(len(choice[1])):
+        if len(choice[1][x]) >1:
+            print("------ " + choice[0][x])
+    print("\n")
+
+    print(" - If you want to see all files that will be sorted type all")
+    print(" - Else if you want to see which files will be sorted in a category, type it's name")
+    print(" - Else type none")
+    argument = input("-> ")
+    if "all" in argument:
+        print("\n------ ", end ="")
+        print(*allFiles, sep=", \n------ ")
+    elif "none" in argument:
+        print("")
+    else:
+        result = switcher.get(argument, "Invalid choice")
+        if isinstance(result, str):
+            print(result)
+        else:
+            for x in range(len(userchoice)):
+                if result == userchoice[x]:
+                    for y in range(len(choice[1][result])-1):
+                        print("------ " + choice[1][result][y+1])
+    input("\nPress Enter to continue...\n")
+
 
 for y in range(len(userchoice)):
+    print('\n')
     try:
         path = desktop+"\\"+choice[0][userchoice[y]]
         os.mkdir(path)
-        for file in range(len(choice[1][userchoice[y]])-1):
-            try:
-                os.rename(desktop+"\\"+choice[1][userchoice[y]][file+1], path+"\\"+choice[1][userchoice[y]][file+1])
-            except OSError:
-                print("Changing location of %s failed"% choice[1][userchoice[y]][file+1])
-            else:
-                print("Succussfully changed location of %s" % choice[1][userchoice[y]][file+1])
     except OSError:
-        print ("Creation of the directory %s failed" % path )
+        print ("Creation of the directory %s failed" % path +
+        "\n(it may be because the folder already exists, if so the file will still be sorted)")
     else:
         print ("Successfully created the directory %s" % path)
+    print('\n')
+    for file in range(len(choice[1][userchoice[y]])-1):
+        try:
+            os.rename(desktop+"\\"+choice[1][userchoice[y]][file+1], path+"\\"+choice[1][userchoice[y]][file+1])
+        except OSError:
+            print("Changing location of %s failed"% choice[1][userchoice[y]][file+1])
+        else:
+            print("Successfully changed location of %s" % choice[1][userchoice[y]][file+1])
 
-# TODO type the name to see more details for a type of file
-# TODO Type number to ignore that kinda file
-
-# Récupérer tout les types de fichier, voir quel dossier créer, demander le nom
-# demander quel type trier, montrer les formats, si y en a qu'on veut pas avec on tape leur numéro séparés par un espace.
+# Print files that didn't fit any category of there's any
+if(len(Nocategory) > 0):
+    print("these file didn't have any category found")
+for notfound in Nocategory:
+    print(" ---- " + notfound)
