@@ -5,8 +5,12 @@ import re
 from os import listdir
 from os.path import isfile, join
 
-# PATH to Desktop location
-desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+try:
+    # PATH to Desktop location
+    desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+except OSError: #If path to desktop isn't found
+    print("Path wasn't found on your pc")
+    desktop = input("paste the path to your desktop directory, example: F:\\Users\\username\\Desktop: \n")
 
 # All type of files
 audio = [[".aif", ".cda", ".mid", ".midi", ".mp3", ".mpa", ".wav", ".wma", ".wpl", ".ogg"]]
@@ -41,25 +45,25 @@ switcher = {
 }
 
 result=  ""
-while(result != -1):
+while(1):
     os.system('CLS')
     print("Here are the kind of file that can be sorted: ")
     for type in choice[0]:
         print("------ " + type)
     print('\n')
-    argument = input("If you want more details about a type, type it\'s name else type 0: ")
-    if "0" in argument:
-        result = -1
+    argument = input("If you want more details about a type, type it\'s name else press enter: ")
+    if len(argument) == 0 :
+        break
     else:
         result = "string"
 
-    while(isinstance(result, str)):
+    while(1):
         result = switcher.get(argument, "Invalid choice")
         if isinstance(result, str):
             print( result)
-            argument = input('\n' + "which type do you wanna display (0 if nothing) ? ")
-            if "0" in argument:
-                result = -1
+            argument = input('\n' + "which type do you wanna display ? press enter to continue: ")
+            if len(argument) == 0:
+                break
         else:
             print("\nhere are all the extention of this category: ")
             print(choice[1][result])
@@ -95,9 +99,9 @@ for file in allFiles:   # get each file
 userchoice = []
 for x in range(len(choice[1])):
     if len(choice[1][x]) >1:
-        userchoice.append(x)
+        userchoice.append(str(x))
 
-while("none" not in argument):
+while(1):
     os.system('CLS')
     print("Here are the type of file that are going to be sorted from what we found on your desktop: ")
     # Choice of which type of file we want to sort
@@ -108,29 +112,56 @@ while("none" not in argument):
 
     print(" - If you want to see all files that will be sorted type all")
     print(" - Else if you want to see which files will be sorted in a category, type it's name")
-    print(" - Else type none")
+    print(" - If you don't want to sort a category type \"ignore category_name\"") # TODO do the ignore
+    print(" - Else press enter")
     argument = input("-> ")
     if "all" in argument:
         print("\n------ ", end ="")
         print(*allFiles, sep=", \n------ ")
-    elif "none" in argument:
-        print("")
+    elif len(argument) == 0:
+        break
+    elif "ignore" in argument:
+        toIgnore = argument.split(" ")[1]
+        result = switcher.get(toIgnore, "Invalid choice")
+        if isinstance(result, str):
+            print(result)
+        else:
+            temp = choice[1][result][0]
+            choice[1][result] = []
+            choice[1][result].append(temp) #We only keep the extensions and delete files to sort
+            userchoice.remove(str(result)) # Remove the index in choice of the folder to create
     else:
         result = switcher.get(argument, "Invalid choice")
         if isinstance(result, str):
             print(result)
         else:
-            for x in range(len(userchoice)):
-                if result == userchoice[x]:
-                    for y in range(len(choice[1][result])-1):
-                        print("------ " + choice[1][result][y+1])
+            while(1):
+                print("\nFiles: ")
+                for x in range(len(userchoice)):
+                    if str(result) == userchoice[x]:
+                        for y in range(len(choice[1][result])-1):
+                            print(str(y+1)+" ------ " + choice[1][result][y+1])
+
+                noSort = input("if you don\'t want a file to be sorted type it\'s number else press enter: ")
+                if(len(noSort) == 0):
+                    break
+                else:
+                    try:
+                        choice[1][result].pop(int(noSort))
+                        if(len(choice[1][result]) < 2):
+                            userchoice.remove(str(result)) # Remove the index in choice of the folder to create
+                    except IndexError:
+                        print("This file doesn't exist")
+                    except ValueError:
+                        print("Wrong input")
+
     input("\nPress Enter to continue...\n")
 
 
 for y in range(len(userchoice)):
     print('\n')
     try:
-        path = desktop+"\\"+choice[0][userchoice[y]]
+        path = desktop+"\\"+choice[0][int(userchoice[y])]
         os.mkdir(path)
     except OSError:
         print ("Creation of the directory %s failed" % path +
@@ -138,13 +169,13 @@ for y in range(len(userchoice)):
     else:
         print ("Successfully created the directory %s" % path)
     print('\n')
-    for file in range(len(choice[1][userchoice[y]])-1):
+    for file in range(len(choice[1][int(userchoice[y])])-1):
         try:
-            os.rename(desktop+"\\"+choice[1][userchoice[y]][file+1], path+"\\"+choice[1][userchoice[y]][file+1])
+            os.rename(desktop+"\\"+choice[1][int(userchoice[y])][file+1], path+"\\"+choice[1][int(userchoice[y])][file+1])
         except OSError:
-            print("Changing location of %s failed"% choice[1][userchoice[y]][file+1])
+            print("Changing location of %s failed"% choice[1][int(userchoice[y])][file+1])
         else:
-            print("Successfully changed location of %s" % choice[1][userchoice[y]][file+1])
+            print("Successfully changed location of %s" % choice[1][int(userchoice[y])][file+1])
 
 # Print files that didn't fit any category of there's any
 if(len(Nocategory) > 0):
