@@ -5,19 +5,22 @@ import re
 from os import listdir
 from os.path import isfile, join
 
-try:
-    # PATH to Desktop location
-    desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-except OSError: #If path to desktop isn't found
-    print("Path wasn't found on your pc")
-    desktop = input("paste the path to your desktop directory, example: F:\\Users\\username\\Desktop: \n")
+while(1):
+    try:
+        # PATH to Desktop location
+        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        listdir(desktop)
+        break
+    except OSError: #If path to desktop isn't found
+        print("Path wasn't found on your pc")
+        desktop = input("paste the path to your desktop directory, example: F:\\Users\\username\\Desktop: \n")
 
 # All type of files
 audio = [[".aif", ".cda", ".mid", ".midi", ".mp3", ".mpa", ".wav", ".wma", ".wpl", ".ogg"]]
 compressed = [[".7z", ".arj", ".pkg", ".rar", ".tar.gz", ".z", ".zip"]]
 documents = [[".xml", ".key", ".odp", ".pps", ".ppt", ".pptx", ".xlsx", ".xlsm", ".xls", ".ods",
              ".doc", ".odt", ".pdf", ".rtf", ".tex", ".txt", ".wpd"]]
-shortcut = [[".lnk"]]
+shortcut = [[".lnk", ".url"]]
 video = [[".mp4", ".avi", ".flv", ".h264", ".m4v", ".mkv", ".mov", ".mpg", ".rm", ".swf", ".wmv", ".3gp", ".3g2"]]
 programming = [[".js", ".html", ".css", ".c", ".cpp", ".class", ".cs", ".h", ".java",
                ".pl", ".sh", ".swift", ".vb", ".php", ".py", ".cfg", ".dll", ".bat", ".apk",  ".sql"]]
@@ -25,13 +28,13 @@ pictures = [[".ai", ".bmp", ".gif", ".ico", ".jpeg", ".jpg", ".png", ".ps", ".ps
 executable = [[".exe"]]
 other = [[".bin", ".iso", ".csv", ".dat", ".dbf", ".db", ".log", ".mdb", ".sav", ".tar"]]
 
-# To display
+# each category available, also containing and the array with extention
 choice = [["audio", "compressed", "documents", "shortcut", "video", "programming", "pictures", "executable", "other"],
           [audio, compressed, documents, shortcut, video, programming, pictures, executable, other]]
 
 allFiles = [] # All file names found on the user's desktop
 
-# return the index of the type of file the user want more details about
+# return the index of the type of file depending on the user input
 switcher = {
     "audio": 0,
     "compressed": 1,
@@ -44,7 +47,6 @@ switcher = {
     "other": 8
 }
 
-result=  ""
 while(1):
     os.system('CLS')
     print("Here are the kind of file that can be sorted: ")
@@ -60,7 +62,7 @@ while(1):
     while(1):
         result = switcher.get(argument, "Invalid choice")
         if isinstance(result, str):
-            print( result)
+            print(result)
             argument = input('\n' + "which type do you wanna display ? press enter to continue: ")
             if len(argument) == 0:
                 break
@@ -82,7 +84,8 @@ if len(allFiles) < 1:
     input("\nPress Enter to continue...\n")
     os._exit(0)
 input("\nPress Enter to continue...\n")
-Nocategory = []
+Nocategory = [] # File with no category found, will be displayed
+                # at the end of the sorting operation
 
 
 for file in allFiles:   # get each file
@@ -94,7 +97,7 @@ for file in allFiles:   # get each file
                 choice[1][type].append(file)
                 found = True
     if found == False:
-        Nocategory.append(file) # If the file extention wasn't find
+        Nocategory.append(file) # If the file extention wasn't found
 
 userchoice = []
 for x in range(len(choice[1])):
